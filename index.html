@@ -4,45 +4,672 @@
         <meta charset="utf-8">
         <title></title>
         <style media="screen">
+            :root
+            {
+                --white: #faf8f9;
+                --blue: #369192;
+                --black: #000103;
+                --gray: #232524;
+            }
             body
             {
                 margin: 0;
+                background: var(--black);
             }
+
+            .restart
+            {
+                position: absolute;
+                color: var(--white);
+                transition: color 0.25s ease-in-out;
+                cursor: url(img/cursor.png) 10 2,pointer;
+                top: 0.8vw;
+                left: 23vw;
+                font-size: 3vw;
+                width: 3vw;
+                height: 3vw;
+                z-index: 1;
+                user-select: none;
+            }
+            .restart:hover
+            {
+                color: var(--blue);
+            }
+
+            /* FRAME */
             .frame
             {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-                height: 100%;
-                width: 100%;
-            }
-            .soon
-            {
-                font-variant: small-caps;
-                pointer-events: none;
-                padding: 25px;
-                position: absolute;
-                font-size: 2vw;
-                color: white;
-                z-index: 1;
-                background-color: black;
-                border-radius: 5px;
+                width: 80vw;
+                height: 50vw;
                 margin: 0 auto;
-            }
-            .vid
-            {
-                width: 100vw;
-                height: 100hv;
+                padding: 3vw;
+                padding-top: 4vw;
+                perspective: 800px;
                 z-index: 0;
+                user-select: none;
             }
+
+            .column:nth-child(1)
+            {
+                display: inline-block;
+                width: 20vw;
+                height: inherit;
+                transform: rotateY(10deg);
+            }
+            .column:nth-child(2)
+            {
+                position: relative;
+                top: 1vw;
+                left: 0.4vw;
+                display: inline-block;
+                width: 20vw;
+                height: 48vw;
+                vertical-align: top;
+            }
+            .column:nth-child(3)
+            {
+                display: inline-block;
+                width: 39.5vw;
+                left: 0.1vw;
+                height: inherit;
+                transform: rotateY(354.7deg);
+                position: relative;
+            }
+
+            .column .cell
+            {
+                border: 0.12vw solid var(--gray);
+                box-sizing: border-box;
+                width: inherit;
+                height: 20%;
+                margin: 0.2vw;
+                display: block;
+                color: white;
+                cursor: url(img/cursor.png) 10 2,pointer;
+                transition: border 0.25s ease-in-out;
+                background-repeat: no-repeat;
+                background-size: 100%;
+                background-position: 50% 50%;
+                position: relative;
+                font-family: Verdana, sans-serif;
+            }
+            .column .cell.hover
+            {
+                border: 0.12vw solid var(--white);
+            }
+            .column .cell:not(.hover):hover
+            {
+                border: 0.12vw solid var(--white);
+            }
+
+            /* ACT SELECTION */
+            .frame.selection .column .cell
+            {
+                height: 30%;
+            }
+            .frame.selection .column .cell:nth-of-type(1n+4),
+            .frame.selection .column .cell .name,
+            .frame.selection .column .cell .marker
+            {
+                display: none;
+            }
+            .frame.selection .column:nth-child(3) .cell:nth-child(1)
+            {
+                background-image: url("./img/breaches_selection.jpg");
+            }
+            .frame.selection .column:nth-child(3) .cell:nth-child(2)
+            {
+                background-image: url("./img/bogdan_selection.jpg");
+            }
+            .frame.selection .column:nth-child(3) .cell:nth-child(3)
+            {
+                background-image: url("./img/doomsday_selection.jpg");
+            }
+
+            .frame:not(.selection) .column .cell .name,
+            .frame:not(.selection) .column .cell .marker
+            {
+                display: block;
+                position: absolute;
+                width: 100%;
+                height: 15%;
+                pointer-events: none;
+            }
+            .frame:not(.selection) .column .cell .name
+            {
+                top: 0;
+                background-color: black;
+
+            }
+            .frame:not(.selection) .column .cell .marker { bottom: 0.2vw; }
+            .frame:not(.selection) .column .cell.completed .marker,
+            .frame:not(.selection) .column .cell.purchased .marker,
+            .frame:not(.selection) .column .cell.stolen .marker
+            {
+                bottom: 0.2vw;
+                background-color: var(--blue);
+                color: var(--black);
+            }
+            .frame:not(.selection) .column .cell .marker:before
+            {
+                text-transform: uppercase;
+                top: 0.15vw;
+                position: absolute;
+                right: 3vw;
+            }
+            .frame:not(.selection) .column .cell .marker:after
+            {
+                text-transform: uppercase;
+                top: 0.1vw;
+                position: absolute;
+                right: 1vw;
+                font-size:1vw;
+            }
+            .frame:not(.selection) .column .cell.completed .marker:before { content: "Completed"; }
+            .frame:not(.selection) .column .cell.completed .marker:after { content: "✔"; }
+            .frame:not(.selection) .column .cell.purchased .marker:before { content: "Purchased"; }
+            .frame:not(.selection) .column .cell.purchased .marker:after { content: "$"; }
+            .frame:not(.selection) .column .cell.stolen .marker:before { content: "Stolen"; }
+            .frame:not(.selection) .column .cell.stolen .marker:after { content: "⭜" }
+
+
+            /* ACT 1 */
+            .frame.breaches .column .cell:nth-of-type(1n+4) { display: none; }
+            .frame.breaches .column:nth-child(2) .cell:nth-child(1) { background-image: url("./img/breaches_prep1.jpg"); }
+            .frame.breaches .column:nth-child(2) .cell:nth-child(2) { background-image: url("./img/breaches_prep2.jpg"); }
+            .frame.breaches .column:nth-child(2) .cell:nth-child(3) { background-image: url("./img/breaches_prep3.jpg"); }
+            .frame.breaches .column:nth-child(3) .cell:nth-child(1) { background-image: url("./img/breaches_setup1.jpg"); }
+            .frame.breaches .column:nth-child(3) .cell:nth-child(2) { background-image: url("./img/breaches_setup2.jpg"); }
+            .frame.breaches .column:nth-child(3) .cell:nth-child(3) { background-image: url("./img/breaches_setup3.jpg"); }
+
+            /* ACT 2 */
+            .frame.bogdan .column .cell:nth-of-type(1n+5) { display: none; }
+            .frame.bogdan .column:nth-child(2) .cell:nth-child(1) { background-image: url("./img/bogdan_prep1.jpg"); }
+            .frame.bogdan .column:nth-child(2) .cell:nth-child(2) { background-image: url("./img/bogdan_prep2.jpg"); }
+            .frame.bogdan .column:nth-child(2) .cell:nth-child(3) { background-image: url("./img/bogdan_prep3.jpg"); }
+            .frame.bogdan .column:nth-child(1) .cell:nth-child(4) { background-image: url("./img/bogdan_prep4a.jpg"); }
+            .frame.bogdan .column:nth-child(2) .cell:nth-child(4) { background-image: url("./img/bogdan_prep4b.jpg"); }
+            .frame.bogdan .column:nth-child(3) .cell:nth-child(1) { background-image: url("./img/bogdan_setup1.jpg"); }
+            .frame.bogdan .column:nth-child(3) .cell:nth-child(2) { background-image: url("./img/bogdan_setup2.jpg"); }
+            .frame.bogdan .column:nth-child(3) .cell:nth-child(3) { background-image: url("./img/bogdan_setup3.jpg"); }
+            .frame.bogdan .column:nth-child(3) .cell:nth-child(4) { background-image: url("./img/bogdan_setup4.jpg"); }
+
+            /* ACT 3 */
+            .frame.doomsday .column .cell:nth-of-type(1n+6) { display: none; }
+            .frame.doomsday .column:nth-child(1) .cell:nth-child(1) { background-image: url("./img/doomsday_prep1a.jpg"); }
+            .frame.doomsday .column:nth-child(2) .cell:nth-child(1) { background-image: url("./img/doomsday_prep1b.jpg"); }
+            .frame.doomsday .column:nth-child(2) .cell:nth-child(2) { background-image: url("./img/doomsday_prep2.jpg"); }
+            .frame.doomsday .column:nth-child(2) .cell:nth-child(3) { background-image: url("./img/doomsday_prep3.jpg"); }
+            .frame.doomsday .column:nth-child(2) .cell:nth-child(4) { background-image: url("./img/doomsday_prep4.jpg"); }
+            .frame.doomsday .column:nth-child(2) .cell:nth-child(5) { background-image: url("./img/doomsday_prep5.jpg"); }
+            .frame.doomsday .column:nth-child(3) .cell:nth-child(1) { background-image: url("./img/doomsday_setup1.jpg"); }
+            .frame.doomsday .column:nth-child(3) .cell:nth-child(2) { background-image: url("./img/doomsday_setup2.jpg"); }
+            .frame.doomsday .column:nth-child(3) .cell:nth-child(3) { background-image: url("./img/doomsday_setup3.jpg"); }
+            .frame.doomsday .column:nth-child(3) .cell:nth-child(4) { background-image: url("./img/doomsday_setup4.jpg"); }
+            .frame.doomsday .column:nth-child(3) .cell:nth-child(5) { background-image: url("./img/doomsday_setup5.jpg"); }
+
+
+            .back
+            {
+                position: absolute;
+                background-image: url("img/button_back.png");
+                background-size: contain;
+                width: 4vw;
+                height: 4vw;
+                top: 41vw;
+                left: 2vw;
+                cursor: url(img/cursor.png) 10 2,pointer;
+                pointer-events: all;
+                transition: filter 0.2s ease-in-out;
+            }
+            .back:hover
+            {
+                filter: brightness(150%);
+            }
+
+            /*
+                OBTAIN STAT.TXT
+            */
+            .statTextViewer
+            {
+                position: absolute;
+                top: 2.5vw;
+                left: 25vw;
+                width: 50vw;
+                height: 50vw;
+                background-color: black;
+                color: #f0eeef9c;
+                white-space: pre-wrap;
+                z-index: 3;
+                border: 0.3vw solid #5f8151ab;
+                overflow-y: scroll;
+                padding: 2vw;
+                line-height: 1.5vw;
+                font-size: 1vw;
+                pointer-events: all;
+                display: none;
+            }
+            .textViewOverlay
+            {
+                background-color: #00000077;
+                z-index: 2;
+                position: absolute;
+                width: 100vw;
+                height: 100vh;
+                cursor: url(img/cursor.png) 10 2,pointer;
+                display: none;
+            }
+            .overlay
+            {
+                background-color: #00000077;
+                z-index: 2;
+                position: absolute;
+                width: 100vw;
+                height: 100vh;
+                cursor: url(img/cursor.png) 10 2,pointer;
+                pointer-events: all;
+                transition: opacity 0.2s ease-in-out;
+                display: none;
+            }
+
+            .stattextContainer
+            {
+                top: 1.4vw;
+                left: 27vw;
+                position: absolute;
+                user-select: none;
+                z-index: 1;
+            }
+            .stattextContainer > div
+            {
+                display: inline-block;
+                color: transparent;
+                text-shadow: 0 0 0.1vw #93a1aa;
+                padding-left: 1.8vw;
+                font-size: 1.5vw;
+                line-height: 1.5vw;
+                font-variant: all-small-caps;
+                font-family: system-ui;
+                text-align: center;
+                padding: 0 0vw 0.25vw 1vw;
+            }
+            .statTextButton
+            {
+                position: relative;
+                border: 0.2vw solid #566c7c;
+                border-radius: 0.2vw;
+                cursor: url(img/cursor.png) 10 2,pointer;
+                background-color: #2b3c48ab;
+                pointer-events: all;
+            }
+            .statTextButton:after
+            {
+                top: -0.9vw;
+                right: -0.1vw;
+                position: relative;
+                content: "✔";
+                pointer-events: none;
+                opacity: 0;
+                font-size: 1.5vw;
+            }
+            #downloadButton
+            {
+                left: 2vw;
+            }
+            #displayButton
+            {
+                left: 4vw;
+            }
+            .appear:after
+            {
+                opacity: 1;
+            }
+            .fadeOut:after
+            {
+                transition: opacity 3s ease-in;
+            }
+
         </style>
     </head>
     <body>
-        <div class="frame">
-            <div class="soon">Coming soon</div>
-            <video class="vid" autoplay muted>
-              <source src="Lester'sDance.mp4" type="video/mp4">
-            </video>
+        <div class="restart">⟲</div>
+        <a class="back" href="https://beholdmystuff.github.io/heist-stat.txt-maker/"></a>
+        <div class="stattextContainer">
+            <div id="stattextLabel">stat.txt:</div>
+            <div id="copyButton" class="statTextButton">copy to clipboard</div>
+            <div id="downloadButton" class="statTextButton">download</div>
+        </div>
+
+        <div class="frame selection">
+            <div class="column">
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+            </div>
+            <div class="column">
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+            </div>
+            <div class="column">
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
+            </div>
         </div>
     </body>
+    <script type="text/javascript">
+        /* INIT */
+        let heistSelection =
+        {
+            prep: 0,
+            skip: 0,
+            setup: 0,
+            chapters: [],
+            jobs: [],
+            elements: {},
+            clickOrder: [],
+            load: function()
+            {
+                this.prep = 0;
+                this.skip = 0;
+                this.setup = 0;
+                this.chapters = ["selection", "breaches", "bogdan", "doomsday"];
+
+                this.jobs =
+                {
+                    "breaches":
+                    [
+                        [null, {name: "Prep: Paramedic Equipment", bit: 0}, {name: "Setup: Dead Courier", bit: 0}],
+                        [null, {name: "Prep: Deluxos", bit: 1}, {name: "Setup: Signal Intercepts", bit: 1}],
+                        [null, {name: "Prep: Akula", bit: 2}, {name: "Setup: Server Farm", bit: 2}]
+                    ],
+                    "bogdan":
+                    [
+                        [null, {name: "Prep: Keycards", bit: 3}, {name: "Setup: Avenger", bit: 4}],
+                        [null, {name: "Prep: ULP Intel", bit: 4}, {name: "Setup: Rescue ULP", bit: 5}],
+                        [null, {name: "Prep: Riot Control Van", bit: 5}, {name: "Setup: Salvage Hard Drives", bit: 6}],
+                        [{name: "Prep: Strombergs", bit: 6}, {name: "Prep: Torpedo ECU", bit: 7}, {name: "Setup: Submarine Recon", bit: 7}]
+                    ],
+                    "doomsday":
+                    [
+                        [{name: "Prep: Marked Cash", bit: 8}, {name: "Prep: Recon", bit: 9}, {name: "Setup: Rescue Agent 14", bit: 9}],
+                        [null, {name: "Prep: Chernobog", bit: 10}, {name: "Setup: Rescue ULP", bit: 10}],
+                        [null, {name: "Prep: Flight Path", bit: 11}, {name: "Setup: Barrage", bit: 11}],
+                        [null, {name: "Prep: Test Site Intel", bit: 12}, {name: "Setup: Khanjali", bit: 12}],
+                        [null, {name: "Prep: Onboard Computer", bit: 13}, {name: "Setup: Air Defenses", bit: 13}]
+                    ] //stolen |= (1 << (bit + 13))
+                };
+
+                this.elements = [...document.querySelectorAll(".column .cell")];
+                this.elements.forEach((element) =>
+                {
+                    element.addEventListener("mouseover", rowHover);
+                    element.addEventListener("mouseout", rowHover);
+                    element.addEventListener("click", cellClick);
+                    element.addEventListener("contextmenu", cellClick);
+                });
+
+                this.clickOrder = ["completed", "purchased", "stolen"];
+
+                //setup restart button
+                document.querySelector(".restart").addEventListener("click", (event) =>
+                {
+                    this.elements.forEach((element) =>
+                    {
+                        element.removeEventListener("mouseover", rowHover);
+                        element.removeEventListener("mouseout", rowHover);
+                        element.removeEventListener("click", cellClick);
+                        element.removeEventListener("contextmenu", cellClick);
+                        element.className = "cell";
+                    });
+                    document.querySelector(".frame").className = "frame selection";
+                    this.load();
+                });
+            },
+            loadChapter: function(target)
+            {
+                const rowID = getRowID(target);
+
+                document.querySelector(".frame").className = "frame " + this.chapters[rowID];
+                this.elements.forEach((element) =>
+                {
+                    element.removeEventListener("mouseover", rowHover);
+                    element.removeEventListener("mouseout", rowHover);
+                    element.classList.remove("hover");
+                });
+            },
+            toggleJob: function(event, screen)
+            {
+                const rowID = getRowID(event.target);
+                const columnID = getColumnID(event.target)
+                const job = this.jobs[screen][rowID-1][columnID-1];
+
+                if (!job)
+                    return;
+
+                // obtain type: none, completed, purchased, stolen.
+                let type = this.clickOrder.indexOf(event.target.classList[1]);
+
+                if (columnID != 3) //if not setup, have 3 toggles
+                {
+                    if (event.button === 0) //left mouse button, increment toggle
+                    {
+                        type += 1;
+                        if (type > 2)
+                            type = -1;
+                    }
+                    else if (event.button === 2) //right mouse button, decrement toggle
+                    {
+                        type -= 1;
+                        if (type < -1)
+                            type = 2;
+                    }
+
+                    //flip prep switch
+                    switch (type)
+                    {
+                        case -1: //clear completed, purchased and stolen
+                            this.skip &= ~(1 << job.bit);
+                            this.prep &= ~(1 << job.bit);
+                            this.prep &= ~(1 << (job.bit + 13));
+                            break;
+                        case 0: //set completed, clear stolen and purchased
+                            this.prep |= (1 << job.bit);
+                            this.prep &= ~(1 << (job.bit + 13));
+                            this.skip &= ~(1 << job.bit);
+                            break;
+                        case 1: //set completed and purchased, clear stolen
+                            this.skip |= (1 << job.bit);
+                            this.prep |= (1 << job.bit);
+                            this.prep &= ~(1 << (job.bit + 13));
+                            break;
+                        case 2: //set stolen, clear completed and purchased
+                            this.prep |= (1 << (job.bit + 13));
+                            this.skip &= ~(1 << job.bit);
+                            this.prep &= ~(1 << job.bit);
+                            break;
+                    }
+                }
+                else
+                {
+                    if (event.button === 0) //left mouse button, increment toggle
+                    {
+                        type += 1;
+                        if (type > 0)
+                            type = -1;
+                    }
+                    else if (event.button === 2) //right mouse button, decrement toggle
+                    {
+                        type -= 1;
+                        if (type < -1)
+                            type = 0;
+                    }
+
+                    //flip setup switch
+                    switch (type)
+                    {
+                        case -1: //clear setup switch
+                        this.setup &= ~(1 << job.bit);
+                        break;
+                        case 0: //set completed, clear stolen and purchased
+                        this.setup |= (1 << job.bit);
+                        break;
+                    }
+                }
+
+                event.target.className = "cell" + (this.clickOrder[type] ? (" " + this.clickOrder[type]) : "");
+            }
+        }
+
+        /* HOVER AND CLICK EVENTS */
+        //HOVER
+        function getRowID(target)
+        {
+            return [...target.parentElement.children].indexOf(target) + 1;
+        }
+        function getColumnID(target)
+        {
+            return [...target.parentElement.parentElement.children].indexOf(target.parentElement) + 1;
+        }
+        function rowHover(event)
+        {
+            const rowID = getRowID(event.target);
+            const row = document.querySelectorAll(`.column .cell:nth-child(${rowID})`);
+            row.forEach((cell) =>
+            {
+                if (!cell.classList.contains("hover"))
+                    cell.classList.add("hover");
+                else
+                    cell.classList.remove("hover");
+            });
+        }
+
+        function rowHover(event)
+        {
+            const rowID = getRowID(event.target);
+            const row = document.querySelectorAll(`.column .cell:nth-child(${rowID})`);
+            row.forEach((cell) =>
+            {
+                if (!cell.classList.contains("hover"))
+                    cell.classList.add("hover");
+                else
+                    cell.classList.remove("hover");
+            });
+        }
+
+        // CLICK
+        function cellClick(event)
+        {
+            event.preventDefault();
+            const screen = document.querySelector(".frame").classList[1];
+
+            //havent use switch in a while, that's why
+            switch (screen)
+            {
+                case "selection":
+                    heistSelection.loadChapter(event.target, screen);
+                    break;
+                default:
+                    heistSelection.toggleJob(event, screen);
+            }
+            return false;
+        }
+
+        //RUN
+        heistSelection.load();
+
+        /*
+            OBTAIN STAT.TXT
+        */
+
+        function buildStat()
+        {
+            let stat = ["INT32"];
+            stat.push("$MPx_GANGOPS_FLOW_MISSION_PROG");
+            stat.push(heistSelection.setup);
+            stat.push("$MPx_GANGOPS_FM_MISSION_PROG");
+            stat.push(heistSelection.setup);
+            if (heistSelection.skip > 0)
+            {
+                stat.push("$MPx_GANGOPS_FM_MISSION_SKIP");
+                stat.push(heistSelection.skip);
+            }
+            return stat.join("\n");
+        }
+
+
+        function downloadTxt(string)
+        {
+            //create data blob
+            var blob = new Blob([string], {type: 'text/csv'});
+
+            //download data blob
+            if (window.navigator.msSaveOrOpenBlob) //with api
+            {
+                window.navigator.msSaveBlob(blob, "stat.txt");
+            }
+            else //without api
+            {
+                var element = window.document.createElement('a');
+                element.href = window.URL.createObjectURL(blob);
+                element.download = "stat.txt";
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            }
+        }
+
+        function copyToClipboard(string)
+        {
+            //create invisible textarea to copy
+            var textArea = document.createElement("textarea");
+            textArea.className = "invisibleTextarea";
+            textArea.value = string;
+            document.body.appendChild(textArea);
+
+            //copy
+            textArea.focus();
+            textArea.select();
+            document.execCommand('copy');
+
+            //remove witness
+            document.body.removeChild(textArea);
+        }
+
+        /* fade with stat.txt buttons */
+        function fadeDatShiet(element)
+        {
+            element.classList.add("appear");
+            element.classList.remove("fadeOut");
+            setTimeout(function(element){element.classList.add("appear");}, 0, element);
+            setTimeout(function(element)
+            {
+                element.classList.add("fadeOut");
+                element.classList.remove("appear");
+            }, 0, element);
+        }
+
+        function copyButton(event)
+        {
+            copyToClipboard(buildStat());
+            let button = document.querySelector("#copyButton");
+            fadeDatShiet(button);
+        }
+        document.querySelector("#copyButton").addEventListener("click", copyButton);
+
+        function downloadButton(event)
+        {
+            downloadTxt(buildStat());
+            let button = document.querySelector("#downloadButton");
+            fadeDatShiet(button);
+        }
+        document.querySelector("#downloadButton").addEventListener("click", downloadButton);
+    </script>
 </html>
