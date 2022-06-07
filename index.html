@@ -15,6 +15,7 @@
             {
                 margin: 0;
                 background: var(--black);
+                white-space: nowrap;
             }
 
             .restart
@@ -108,7 +109,6 @@
                 height: 30%;
             }
             .frame.selection .column .cell:nth-of-type(1n+4),
-            .frame.selection .column .cell .name,
             .frame.selection .column .cell .marker
             {
                 display: none;
@@ -126,7 +126,7 @@
                 background-image: url("./img/doomsday_selection.jpg");
             }
 
-            .frame:not(.selection) .column .cell .name,
+            .frame .column .cell .name,
             .frame:not(.selection) .column .cell .marker
             {
                 display: block;
@@ -135,11 +135,24 @@
                 height: 15%;
                 pointer-events: none;
             }
+            .frame.selection .column .cell .name
+            {
+                top: 0;
+                background-color: black;
+                text-transform: uppercase;
+                color: var(--white);
+                line-height: 225%;
+                font-size: 125%;
+                text-align: center;
+            }
             .frame:not(.selection) .column .cell .name
             {
                 top: 0;
                 background-color: black;
-
+                text-transform: uppercase;
+                color: var(--white);
+                text-align: center;
+                line-height: 190%;
             }
             .frame:not(.selection) .column .cell .marker { bottom: 0.2vw; }
             .frame:not(.selection) .column .cell.completed .marker,
@@ -169,7 +182,7 @@
             .frame:not(.selection) .column .cell.completed .marker:after { content: "✔"; }
             .frame:not(.selection) .column .cell.purchased .marker:before { content: "Purchased"; }
             .frame:not(.selection) .column .cell.purchased .marker:after { content: "$"; }
-            .frame:not(.selection) .column .cell.stolen .marker:before { content: "Stolen"; }
+            .frame:not(.selection) .column .cell.stolen .marker:before { content: "Acquired from rival"; }
             .frame:not(.selection) .column .cell.stolen .marker:after { content: "⭜" }
 
 
@@ -345,7 +358,7 @@
                 <div class="cell"><div class="name"></div><div class="marker"></div></div>
                 <div class="cell"></div>
                 <div class="cell"></div>
-                <div class="cell"></div>
+                <div class="cell"><div class="name"></div><div class="marker"></div></div>
                 <div class="cell"><div class="name"></div><div class="marker"></div></div>
             </div>
             <div class="column">
@@ -428,22 +441,52 @@
                         element.removeEventListener("click", cellClick);
                         element.removeEventListener("contextmenu", cellClick);
                         element.className = "cell";
+
+                        let name = element.querySelector(".name");
+                        if(name)
+                            element.querySelector(".name").textContent = "";
                     });
                     document.querySelector(".frame").className = "frame selection";
                     this.load();
                 });
+
+                // set text labels
+                let acts = document.querySelectorAll(".column:nth-child(3) .cell:nth-of-type(-n+3) .name");
+                acts[0].textContent = "Act 1: Data Breaches";
+                acts[1].textContent = "Act 2: Bogdan Problem";
+                acts[2].textContent = "Act 3: Doomsday Scenario";
             },
             loadChapter: function(target)
             {
                 const rowID = getRowID(target);
 
-                document.querySelector(".frame").className = "frame " + this.chapters[rowID];
+                const chapterName = this.chapters[rowID];
+                document.querySelector(".frame").className = "frame " + chapterName;
                 this.elements.forEach((element) =>
                 {
                     element.removeEventListener("mouseover", rowHover);
                     element.removeEventListener("mouseout", rowHover);
                     element.classList.remove("hover");
                 });
+
+                const columns = [...document.querySelectorAll(".column")];
+
+                let chapter = this.jobs[chapterName];
+                for (var episodeID = 0, chapterLength = chapter.length; episodeID < chapterLength; episodeID++)
+                {
+                    const episode = chapter[episodeID];
+
+                    for (var columnID = 0, columnsLength = episode.length; columnID < columnsLength; columnID++)
+                    {
+                        const cell = columns[columnID].children[episodeID];
+
+                        const cellData = episode[columnID];
+                        let name = cell.querySelector(".name");
+                        if (cellData && name)
+                            name.textContent = cellData.name;
+                    }
+                }
+
             },
             toggleJob: function(event, screen)
             {
@@ -478,22 +521,21 @@
                         case -1: //clear completed, purchased and stolen
                             this.skip &= ~(1 << job.bit);
                             this.prep &= ~(1 << job.bit);
-                            this.prep &= ~(1 << (job.bit + 13));
+                            this.prep &= ~(1 << (job.bit + 14));
                             break;
                         case 0: //set completed, clear stolen and purchased
                             this.prep |= (1 << job.bit);
-                            this.prep &= ~(1 << (job.bit + 13));
+                            this.prep &= ~(1 << (job.bit + 14));
                             this.skip &= ~(1 << job.bit);
                             break;
                         case 1: //set completed and purchased, clear stolen
                             this.skip |= (1 << job.bit);
                             this.prep |= (1 << job.bit);
-                            this.prep &= ~(1 << (job.bit + 13));
+                            this.prep &= ~(1 << (job.bit + 14));
                             break;
                         case 2: //set stolen, clear completed and purchased
-                            this.prep |= (1 << (job.bit + 13));
+                            this.prep |= (1 << (job.bit + 14));
                             this.skip &= ~(1 << job.bit);
-                            this.prep &= ~(1 << job.bit);
                             break;
                     }
                 }
@@ -595,7 +637,7 @@
             stat.push("$MPx_GANGOPS_FLOW_MISSION_PROG");
             stat.push(heistSelection.setup);
             stat.push("$MPx_GANGOPS_FM_MISSION_PROG");
-            stat.push(heistSelection.setup);
+            stat.push(heistSelection.prep);
             if (heistSelection.skip > 0)
             {
                 stat.push("$MPx_GANGOPS_FM_MISSION_SKIP");
